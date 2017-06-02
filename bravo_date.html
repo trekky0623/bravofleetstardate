@@ -37,7 +37,11 @@ function dateform(dayfield, monthfield, yearfield, hourfield, minutefield){
 			hourfield.options[i] = new Option(i, i);
 		}
 	}
-	hourfield.options[today.getHours()] = new Option(today.getHours(), today.getHours(), true, true);
+	hour = today.getHours();
+	if (hour < 10) {
+		hour = "0"+hour;
+	}
+	hourfield.options[today.getHours()] = new Option(hour, today.getHours(), true, true);
 	for (var i=0; i<60; i++){
 		if (i < 10) {
 			minutefield.options[i] = new Option("0"+i, i);
@@ -45,7 +49,11 @@ function dateform(dayfield, monthfield, yearfield, hourfield, minutefield){
 			minutefield.options[i] = new Option(i, i);
 		}
 	}
-	minutefield.options[today.getMinutes()] = new Option(today.getMinutes(), today.getMinutes(), true, true);
+	minute = today.getMinutes();
+	if (minute < 10) {
+		minute = "0"+minute;
+	}
+	minutefield.options[today.getMinutes()] = new Option(minute, today.getMinutes(), true, true);
 }
 
 function bravoDate(d){
