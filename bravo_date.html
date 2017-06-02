@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Bravo Fleet Date/Stardate Converter</title>
+
+<script type="text/javascript">
+
+var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+function dateform(dayfield, monthfield, yearfield, hourfield, minutefield){
+	var today = new Date();
+	var dayfield = document.getElementById(dayfield);
+	var monthfield = document.getElementById(monthfield);
+	var yearfield = document.getElementById(yearfield);
+	var hourfield = document.getElementById(hourfield);
+	var minutefield = document.getElementById(minutefield);
+	for (var i=1; i<32; i++){
+		dayfield.options[i-1] = new Option(i, i);
+	}
+	dayfield.options[today.getDate()-1] = new Option(today.getDate(), today.getDate(), true, true); //select today's day
+	for (var m=0; m<12; m++) {
+		monthfield.options[m] = new Option(months[m], m);
+	}
+	monthfield.options[today.getMonth()] = new Option(months[today.getMonth()], today.getMonth(), true, true); //select today's month
+	var thisyear = today.getFullYear();
+	var startyear = 1950;
+	var endyear = 2050;
+	for (var i=startyear; i<endyear+1; i++){
+		yearfield.options[i-startyear] = new Option(i, i);
+	}
+	yearfield.options[thisyear - startyear] = new Option(today.getFullYear(), today.getFullYear(), true, true); //select today's year
+
+	for (var i=0; i<24; i++){
+		if (i < 10) {
+			hourfield.options[i] = new Option("0"+i, i);
+		} else {
+			hourfield.options[i] = new Option(i, i);
+		}
+	}
+	hourfield.options[today.getHours()] = new Option(today.getHours(), today.getHours(), true, true);
+	for (var i=0; i<60; i++){
+		if (i < 10) {
+			minutefield.options[i] = new Option("0"+i, i);
+		} else {
+			minutefield.options[i] = new Option(i, i);
+		}
+	}
+	minutefield.options[today.getMinutes()] = new Option(today.getMinutes(), today.getMinutes(), true, true);
+}
+
+function bravoDate(d){
+  d = d.valueOf();
+  var rlEpoch = Date.UTC(2010, 0, 1);
+  var bfEpoch = Date.UTC(2386, 0, 1);
+
+  if (d <= Date.UTC(2014, 0, 1)) {
+    return (bfEpoch + (d - rlEpoch) / 2);
+  } else if (d <= Date.UTC(2018, 0, 1)) {
+    rlEpoch = Date.UTC(2014, 0, 1);
+    bfEpoch = bravoDate(rlEpoch);
+    return (bfEpoch + (d - rlEpoch) / 4);
+  } else {
+    rlEpoch = Date.UTC(2018, 0, 1);
+    bfEpoch = bravoDate(rlEpoch);
+    return (bfEpoch + (d - rlEpoch) / 2);
+  }
+}
+
+function dateToStardate(d){
+	var stardate = 0;
+	var year = d.getUTCFullYear()
+	stardate = stardate + 1000 * (year - 2323);
+	var start = "01 Jan " + year + " 00:00:00 GMT";
+	var end = "01 Jan " + (year + 1) + " 00:00:00 GMT";
+	var length = new Date(end) - new Date(start);
+	var progress = d - new Date(start);
+	stardate = stardate + 1000 * (progress/length);
+	return (Math.round(stardate * 10) / 10).toFixed(1);
+}
+
+function displayDateLocal(){
+	var _y = document.getElementById("yeardropdown");
+	var y = _y.options[_y.selectedIndex].value;
+	var _m = document.getElementById("monthdropdown");
+	var m = _m.options[_m.selectedIndex].value;
+	var _d = document.getElementById("daydropdown");
+	var d = _d.options[_d.selectedIndex].value;
+	var _h = document.getElementById("hourdropdown");
+	var h = _h.options[_h.selectedIndex].value;
+	var _x = document.getElementById("minutedropdown");
+	var x = _x.options[_x.selectedIndex].value;
+	var date = (new Date(bravoDate(new Date(y, m, d, h, x)))).toUTCString();
+	document.getElementById("datetext").innerHTML = date.slice(0, -4);
+	stardate = dateToStardate(new Date(date));
+	document.getElementById("stardatetext").innerHTML = stardate;
+}
+
+function displayDate(){
+	var _y = document.getElementById("yeardropdown");
+	var y = _y.options[_y.selectedIndex].value;
+	var _m = document.getElementById("monthdropdown");
+	var m = _m.options[_m.selectedIndex].value;
+	var _d = document.getElementById("daydropdown");
+	var d = _d.options[_d.selectedIndex].value;
+	var _h = document.getElementById("hourdropdown");
+	var h = _h.options[_h.selectedIndex].value;
+	var _x = document.getElementById("minutedropdown");
+	var x = _x.options[_x.selectedIndex].value;
+	var date = (new Date(bravoDate(Date.UTC(y, m, d, h, x)))).toUTCString();
+	document.getElementById("datetext").innerHTML = date.slice(0, -4);
+	stardate = dateToStardate(new Date(date));
+	document.getElementById("stardatetext").innerHTML = stardate;
+}
+</script>
+</head>
+<body>
+<h1>Bravo Fleet Date/Stardate Converter</h1>
+<form action="" name="someform">
+<select id="daydropdown">
+</select> 
+<select id="monthdropdown">
+</select> 
+<select id="yeardropdown">
+</select> 
+<select id="hourdropdown">
+</select>:
+<select id="minutedropdown">
+</select>
+</form>
+
+<input type="button" value="Submit (Local)" onclick="displayDateLocal()"/>
+<input type="button" value="Submit (UTC)" onclick="displayDate()"/>
+
+<h3>Date: <span id="datetext"></span></h3>
+<h3>Stardate: <span id="stardatetext"></span></h3>
+
+<script type="text/javascript">
+
+//populatedropdown(id_of_day_select, id_of_month_select, id_of_year_select)
+window.onload=function(){
+dateform("daydropdown", "monthdropdown", "yeardropdown", "hourdropdown", "minutedropdown");
+}
+</script>
+</body>
+</html>
